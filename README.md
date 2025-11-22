@@ -7,7 +7,8 @@
 <img src="https://img.shields.io/badge/Target-Base_Chain-0052FF?style=for-the-badge&logo=base" />
 
 
-<pre style="text-align:center; font-family: monospace;">
+<div align="center">
+<pre>
      ___________
     /          /|    _____  _   _  _   _  _____ 
  /__________/ |   / ____|| | | || | | ||_   _|
@@ -26,6 +27,7 @@
 <br/>
 **用锤子砸开伪装的外壳，直视土狗的本质**
 </pre>
+</div>
 
 [Live Demo](#) · [Report Bug](#)
 
