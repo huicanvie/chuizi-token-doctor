@@ -6,9 +6,8 @@
 <img src="https://img.shields.io/badge/Mode-Hardcore-red?style=for-the-badge" />
 <img src="https://img.shields.io/badge/Target-Base_Chain-0052FF?style=for-the-badge&logo=base" />
 
-
 <div align="center">
-<pre>
+```text
      ___________
     /          /|    _____  _   _  _   _  _____ 
  /__________/ |   / ____|| | | || | | ||_   _|
@@ -26,7 +25,7 @@
 **Smash open the camouflage. See the truth.**
 <br/>
 **用锤子砸开伪装的外壳，直视土狗的本质**
-</pre>
+```
 </div>
 
 [Live Demo](#) · [Report Bug](#)
