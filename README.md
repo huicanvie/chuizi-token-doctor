@@ -6,162 +6,336 @@
 <img src="https://img.shields.io/badge/Mode-Hardcore-red?style=for-the-badge" />
 <img src="https://img.shields.io/badge/Target-Base_Chain-0052FF?style=for-the-badge&logo=base" />
 
-<div align="center">
-```text
-     ___________
-    /          /|    _____  _   _  _   _  _____ 
- /__________/ |   / ____|| | | || | | ||_   _|
- |          | |  | |     | |_| || | | |  | |  
- |          | |  | |___  |  _  || |_| |  | |  
- |__________|/    \_____||_| |_| \___/  |___| 
-             ||
-             ||             ______   _____
-             ||            |___  /  |_   _|
-     ____||____           / /     | |  
-    /          \         / /      | | 
-    |   SMASH   |       / /___   _| |_
-    \__________/ .     /______| |_____|
-
 **Smash open the camouflage. See the truth.**
-<br/>
-**用锤子砸开伪装的外壳，直视土狗的本质**
-```
-</div>
 
-[Live Demo](#) · [Report Bug](#)
-
-<br/>
-
-[ 🇺🇸 English ](#-english) | [ 🇨🇳 中文文档 ](#-中文文档)
+[ **English** ] | [ [中文文档](./README.zh-CN.md) ]
 
 </div>
 
 ---
 
-### ⚡ What makes "Chuizi" different? (为什么叫锤子？)
+## 📖 Table of Contents
 
-Most scanners just **look** at the code (Static Analysis). Scammers can hide traps easily.
-<br/>
-**Chuizi** doesn't look. **Chuizi hits.**
-
-We fork the Base Mainnet and execute **Real Transactions** in a sandbox.
-*   If the sell transaction fails in our simulation, it's a honeypot. 🍯
-*   If the balance change shows 50% tax, it's a scam. 💸
-*   **We smash the shell to see if there's money inside.**
----
-
-## ⚡ Introduction (简介)
-
-**Chuizi Token Doctor** 不是那些只会在 Etherscan 上读代码的弱鸡扫描器。
-
-我们不猜测，我们 **实战**。
-
-核心原理基于 **Mainnet Forking Simulation**。当你输入一个合约地址时，我们的后端会立即启动一个 Base 主网的平行宇宙（Fork），在这个沙盒里，我们拿真金白银（当然是 Fork 里的假钱）去砸盘、去买入、去卖出。
-
-如果我们在沙盒里无法卖出，那你——在主网上也别想跑掉。
-
-### 🔥 Key Features (核心功能)
-
-- **🧬 真实交易模拟**: 拒绝静态分析误报，直接 fork 主网状态进行原子化交易测试。
-- **🍯 貔貅 (Honeypot) 终结者**: 精确检测只能买不能卖、黑名单限制、暂停交易等恶意逻辑。
-- **💸 隐形税率侦测**: 很多土狗写着 0 税，实际扣你 50%。我们通过余额变动计算最真实的税率。
-- **🚀 极速响应**: 基于 Nest.js + Viem 高性能架构，平均检测耗时 < 3秒。
-- **💎 现代化全栈**: React (Vite) 前端 + Nest.js 后端 + Foundry 核心引擎。
+- [Introduction](#-introduction)
+- [Why "Chuizi" (Hammer)?](#-why-chuizi-hammer)
+- [Key Features](#-key-features)
+- [Architecture](#-architecture)
+- [Getting Started](#-getting-started)
+- [How It Works](#-how-it-works)
+- [Project Structure](#-project-structure)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 ---
 
-## 🛠️ Architecture (技术架构)
+## 💡 Introduction
+
+**Chuizi Token Doctor** is not one of those weak scanners that only read code on Etherscan.
+
+We don't guess. We **test in action**.
+
+The core principle is based on **EVM State Override + eth_call technology**. When you input a contract address, we use the state override feature of `eth_call` to temporarily inject our detection contract code into the mainnet environment. We execute buy and sell tests on the real Base mainnet state — **no contract deployment, no gas consumption, yet achieving results identical to real transactions**.
+
+**If we can't sell in the simulation, you won't be able to escape on mainnet either.**
+
+---
+
+## ⚡ Why "Chuizi" (Hammer)?
+
+Most scanners just **look** at the code (Static Analysis). Scammers can easily hide traps.
+
+**Chuizi doesn't look. Chuizi hits.**
+
+We fork the Base Mainnet and execute **Real Transactions** in a sandbox:
+
+- If the sell transaction fails in our simulation, it's a honeypot 🍯
+- If the balance change shows 50% tax, it's a scam 💸
+- **We smash the shell to see if there's real value inside**
+
+---
+
+## 🔥 Key Features
+
+### 🧬 Real Transaction Simulation
+Reject static analysis false positives. Directly fork mainnet state for atomic transaction testing. Test token behavior in a real blockchain environment.
+
+### 🍯 Honeypot Terminator
+Precisely detect malicious logic like buy-only tokens, blacklist restrictions, and paused trading. If a token has traps, we'll discover them before you lose money.
+
+### 💸 Hidden Tax Detection
+Many scam projects claim 0% tax but actually charge 50%. We calculate the real tax rate through balance changes, exposing hidden fees.
+
+### 🚀 Lightning Fast Response
+Based on Nest.js + ethers.js high-performance architecture, average detection time < 3 seconds. Get results quickly to make informed decisions.
+
+### 💎 Modern Full-Stack
+- **Frontend**: React + Vite + TypeScript + Tailwind CSS
+- **Backend**: Nest.js + ethers.js + TypeScript
+- **Contracts**: Solidity + Hardhat
+
+---
+
+## 🛠️ Architecture
 
 > "Talk is cheap. Show me the code."
 
 ```mermaid
 graph LR
     Client(⚛️ React SPA) <--> API(🦅 Nest.js API)
-    API <--> Engine(🦀 Foundry Anvil)
-    Engine <--> BaseChain(⛓️ Base Mainnet)
+    API <--> RPC(🌐 Base Mainnet RPC)
     
-    subgraph "The Core Magic"
-    Engine -- "Fork & Simulate" --> Simulator.sol
-    Simulator.sol -- "Try Buy & Sell" --> Uniswap_Router
+    subgraph "The Core Magic: State Override"
+    API -- "eth_call + code injection" --> Doctor[TokenDoctor.sol]
+    Doctor -- "Real buy test" --> Uniswap
+    Doctor -- "Real sell test" --> Uniswap
+    Doctor -- "Return via revert" --> API
     end
+    
+    RPC <--> BaseChain(⛓️ Base Mainnet Real-time State)
 ```
-## 🚀 Getting Started (快速开始)
 
-Prerequisites
+### Tech Stack
 
-确保你的环境已经安装了以下神装：
+| Module | Technology | Description |
+|--------|-----------|-------------|
+| Frontend | React + Vite + TypeScript | Modern single-page application |
+| Backend | Nest.js + ethers.js | Enterprise-grade Node.js framework |
+| Contracts | Solidity + Hardhat | Smart contract development & testing |
+| Package Manager | pnpm workspace | Monorepo architecture |
+| Blockchain | Base Chain (L2) | Low-cost, high-performance |
 
-Node.js (v18+)
-Foundry (Forge, Cast, Anvil)
-pnpm (Recommended)
-1. Clone the Repo
+---
 
-git clone https://github.com/yourusername/base-token-doctor.git
-cd base-token-doctor
-2. Setup Contracts & Simulation Engine
+## 🚀 Getting Started
 
-首先，我们需要启动本地的时间屋（Anvil Fork）并部署探测器。
+### Prerequisites
 
-### 终端 A: 启动 Base 主网 Fork
-### 记得替换你的 RPC URL (Alchemy / Infura)
-anvil --fork-url https://mainnet.base.org --port 8545
+Make sure you have the following tools installed:
 
-### 终端 B: 部署探测合约
+- **Node.js** (v18+)
+- **pnpm** (Recommended) - `npm install -g pnpm`
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/huicanvie/chuizi-token-doctor.git
+cd chuizi-token-doctor
+```
+
+### 2. Install Dependencies
+
+```bash
+# Install dependencies for all modules
+pnpm install
+```
+
+### 3. Compile Smart Contracts
+
+```bash
 cd contracts
-forge script script/DeploySimulator.s.sol --rpc-url http://127.0.0.1:8545 --broadcast --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-### Copy the deployed contract address!
-3. Setup Backend (Nest.js)
 
-cd ../backend
+# Install dependencies
 pnpm install
 
-### 创建 .env 文件并填入配置
+# Compile contracts (to get ABI and Bytecode)
+pnpm hardhat compile
+
+# After compilation, artifacts will be generated and loaded by backend
+# Note: No contract deployment needed! Code injected via State Override
+```
+
+### 4. Configure Backend
+
+```bash
+cd backend
+
+# Create .env file
 cp .env.example .env
-### SIMULATOR_CONTRACT_ADDRESS=你的合约地址
-### ANVIL_RPC_URL=http://127.0.0.1:8545
 
+# Edit .env file with the following configuration:
+# RPC_URL=https://mainnet.base.org  # Or use Alchemy/Infura Base RPC
+# DOCTOR_ADDRESS_PLACEHOLDER=0x0000000000000000000000000000000000000001  # Any address works
+# WETH_ADDRESS=0x4200000000000000000000000000000000000006
+# UNISWAP_V3_ROUTER=0x2626664c2603336E57B271c5C0b26F421741e481
+# UNISWAP_V2_ROUTER=0x4752ba5dbc23f44d87826276bf6fd6b1c372ad24
+# SIMULATE_AMOUNT_ETH=0.1
+# SENDER=0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266  # Simulated sender address
+
+# Start development server
 pnpm start:dev
-## 4. Setup Frontend (React)
+```
 
-cd ../frontend
-pnpm install
+### 5. Start Frontend
+
+```bash
+cd frontend
+
+# Start development server
 pnpm dev
-访问 http://localhost:5173，开始你的土狗猎杀之旅。
+```
 
-🧪 How it works (工作原理)
+Visit **http://localhost:5173** and start your scam token hunting journey!
 
-为什么我们的准确率高达 99.9%？因为我们使用了 Simulator.sol。
+---
 
-// 伪代码逻辑展示
-function check(address token) external returns (Result) {
-    // 1. 尝试在 Uniswap 路由买入
+## 🧪 How It Works
+
+### Why is our accuracy rate up to 99.9%?
+
+Because we use **EVM State Override** technology with the **TokenDoctor.sol** smart contract to execute simulation transactions on real mainnet state.
+
+### 🔑 Core Technology: State Override
+
+```typescript
+// Temporarily inject contract code via eth_call's third parameter
+await provider.send('eth_call', [
+  {
+    from: sender,
+    to: doctorAddress,  // any address
+    data: txData,
+    value: simulationAmount,
+  },
+  'latest',
+  {
+    // 🔥 Key: temporarily override the code at this address
+    [doctorAddress]: {
+      code: doctorBytecode,  // inject detection contract
+    },
+  },
+]);
+```
+
+**Technical Advantages:**
+- ✅ **No Deployment**: Contract code only in memory, temporarily injected via RPC call
+- ✅ **Real State**: Direct connection to Base mainnet, using real-time liquidity pools and token state
+- ✅ **Zero Cost**: `eth_call` is read-only, consumes no gas
+- ✅ **Lightning Fast**: No waiting for block confirmation, millisecond-level response
+
+### Core Detection Process
+
+```solidity
+// Pseudo-code logic demonstration
+function simulation(address token) external payable returns (Result) {
+    // 1. Try to buy on Uniswap router
     try router.swapExactETHForTokens(...) {
-        // 记录买入税
+        // Record successful buy, calculate buy tax
+        buySuccess = true;
+        buyTax = calculateTax(expectedAmount, actualAmount);
     } catch {
+        // Buy failed - possible paused trading or blacklist
         return HONEYPOT;
     }
 
-    // 2. 尝试 Approve (很多貔貅死在这一步)
-    token.approve(router, ...);
-
-    // 3. 尝试卖出
-    try router.swapExactTokensForETH(...) {
-        // 记录卖出税
+    // 2. Try Approve (many honeypots fail here)
+    try token.approve(router, maxAmount) {
+        // Approve successful
     } catch {
-        return HONEYPOT; // 只能进不能出！
+        return HONEYPOT; // Cannot approve
     }
+
+    // 3. Try to sell
+    try router.swapExactTokensForETH(...) {
+        // Record successful sell, calculate sell tax
+        sellSuccess = true;
+        sellTax = calculateTax(expectedETH, actualETH);
+    } catch {
+        // Can only buy, not sell! Classic honeypot
+        return HONEYPOT;
+    }
+
+    // 4. Calculate overall tax rate and risk level
+    return Result({
+        buySuccess: buySuccess,
+        sellSuccess: sellSuccess,
+        buyTax: buyTax,
+        sellTax: sellTax,
+        riskLevel: calculateRiskLevel(sellTax)
+    });
 }
-🤝 Contributing (贡献)
+```
 
-欢迎各路大神提交 PR。如果你发现了新的貔貅套路我们的扫描器没测出来，请务必提交 Issue！
+### Detection Metrics
 
-Fork it
-Create your feature branch (git checkout -b feature/AmazingFeature)
-Commit your changes (git commit -m 'Add some AmazingFeature')
-Push to the branch (git push origin feature/AmazingFeature)
-Open a Pull Request
-📄 License
+| Metric | Description | Risk Rating |
+|--------|-------------|-------------|
+| Buy Success Rate | Can successfully buy tokens | Fail = 🔴 CRITICAL |
+| Sell Success Rate | Can successfully sell tokens | Fail = 🔴 CRITICAL |
+| Buy Tax | Actual received tokens vs theoretical | >30% = 🟡 HIGH |
+| Sell Tax | Actual received ETH vs theoretical | >30% = 🟡 HIGH |
+| Gas Consumption | Transaction gas fees | Abnormally high = 🟡 Warning |
 
-Distributed under the MIT License. See LICENSE for more information.
+---
 
-<div align="center"> Made with ❤️ by <a href="https://github.com/huicanvie">Canvie</a> </div> ```
+## 📁 Project Structure
+
+```
+chuizi-token-doctor/
+├── frontend/              # React frontend application
+│   ├── src/
+│   │   ├── components/   # UI components
+│   │   ├── pages/        # Pages
+│   │   └── utils/        # Utility functions
+│   └── package.json
+│
+├── backend/              # Nest.js backend API
+│   ├── src/
+│   │   ├── simulation/   # Simulation service
+│   │   ├── types/        # Type definitions
+│   │   └── main.ts       # Entry file
+│   └── package.json
+│
+├── contracts/            # Solidity smart contracts
+│   ├── contracts/
+│   │   └── TokenDoctor.sol  # Core detection contract
+│   ├── scripts/          # Deployment scripts
+│   └── test/             # Contract tests
+│
+├── pnpm-workspace.yaml   # Monorepo configuration
+└── package.json          # Root configuration
+```
+
+---
+
+## 🤝 Contributing
+
+We welcome PRs from all developers! If you discover a new honeypot pattern that our scanner didn't catch, please submit an Issue.
+
+### How to Contribute
+
+1. **Fork** this repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a **Pull Request**
+
+### Development Guidelines
+
+- Follow TypeScript and ESLint rules
+- Write clear commit messages
+- Add tests for new features
+- Update relevant documentation
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License**. See [LICENSE](./LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- [Hardhat](https://hardhat.org/) - Ethereum development environment
+- [Nest.js](https://nestjs.com/) - Progressive Node.js framework
+- [ethers.js](https://docs.ethers.org/) - Ethereum JavaScript library
+- [Base](https://base.org/) - Coinbase's L2 solution
+
+---
+
+<div align="center">
+
+Made with ❤️ by [Canvie](https://github.com/huicanvie)
+
+**⚠️ Disclaimer**: This tool is for research and educational purposes only. Investment involves risks, please make decisions carefully.
+
+</div> ```

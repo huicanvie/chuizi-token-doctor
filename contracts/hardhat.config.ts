@@ -28,6 +28,11 @@ export default defineConfig({
       type: "edr-simulated",
       chainType: "op",
     },
+    localhost: {
+      type: "http",
+      url: "http://127.0.0.1:8545",
+      chainType: "op",
+    },
     sepolia: {
       type: "http",
       chainType: "l1",
