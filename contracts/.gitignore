@@ -10,6 +10,9 @@
 # Hardhat Build Artifacts
 /artifacts
 
+# Foundry Build Artifacts
+/out
+
 # Hardhat compilation (v2) support directory
 /cache
 
