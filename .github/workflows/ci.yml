@@ -37,8 +37,16 @@ jobs:
         with:
           version: nightly
       
+      - name: Debug submodules
+        run: |
+          git submodule status
+          ls -la lib/
+      
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          echo "Installing dependencies..."
+          pnpm install --frozen-lockfile
+          echo "Installation complete"
       
       - name: Lint backend
         run: |
